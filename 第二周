@@ -1,0 +1,151 @@
+/%
+#include <iostream>
+using namespace std;
+
+int gcd(int, int);
+class fraction {
+	int above;
+	int below;
+	void reduction();
+public:
+	fraction(int a = 0, int b = 1) :above(a/gcd(a,b)), below(b / gcd(a, b)) {
+		reduction();
+	}
+	fraction(const fraction& f) :above(f.above), below(f.below) {}
+	fraction add(const fraction & f) {
+		above = above * f.below + f.above*below;
+		below = below * f.below;
+		this->reduction();
+		return *this;
+	}
+	fraction substract(const fraction& f) {
+		above = above * f.below - f.above * below;
+		below = below * f.below;
+		this->reduction();
+		return *this;
+	}
+	bool IsEqual(const fraction& f) {
+		if (above == f.above&&below == f.below)return 1;
+		else return 0;
+	}
+	void display() {
+		if (above == 0)cout << 0 << endl;
+		else cout << above << "/" << below << endl;
+	}
+};
+
+void fraction::reduction() {
+	above = above / gcd(above, below);
+	below = below / gcd(above, below);
+}
+
+int gcd(int a, int b) {
+	if (a%b == 0)return b ;
+	else return gcd(b, a%b);
+}
+
+
+int main()
+{
+
+	//cout << gcd(10, 30) << endl;
+	fraction a(1, 2), b(5, -15), c(10, 30), d(b), e;
+	a.display();
+	b.display();
+	//c.display();
+	e = a.add(b);
+	e.display();
+
+	e = b.substract(a);
+	e.display();
+
+	e = b.add(c);
+	e.display();
+
+
+	if (d.IsEqual(b))
+		cout << "相等";
+	else
+		cout << "不相等";
+
+	return 0;
+}
+
+%/
+//问题出在add()和substract()以及正负号的存放形式
+//add()和substract()不应改变对象本身，应该新建一个临时变量并返回
+//gcd求公因数用的是欧几里得算法，分子分母都要是正数
+//题干要求分母为正，要不然-1/6和1/-6会被识别为不相等
+
+  改完：
+  #include <iostream>
+using namespace std;
+
+int gcd(int, int);
+class fraction {
+	int above;
+	int below;
+	void reduction();
+public:
+	fraction(int a = 0, int b = 1) :above(a/gcd(a,b)), below(b / gcd(a, b)) {
+		reduction();
+	}
+	fraction(const fraction& f) :above(f.above), below(f.below) {}
+	fraction add(const fraction & f) {
+		int n_above = above * f.below + f.above*below;
+		int n_below = below * f.below;
+		fraction new1(n_above,n_below);
+		return new1;
+	}
+	fraction substract(const fraction& f) {
+		int n_above = above * f.below - f.above * below;
+		int n_below = below * f.below;
+		fraction new1(n_above, n_below);;
+		return new1;
+	}
+	bool IsEqual(const fraction& f) {
+		if (above == f.above&&below == f.below)return 1;
+		else return 0;
+	}
+	void display() {
+		if (above == 0)cout << 0 << endl;
+		else cout << above << "/" << below << endl;
+	}
+};
+
+void fraction::reduction() {
+	above = above / gcd(above, below);
+	below = below / gcd(above, below);
+}
+
+int gcd(int a, int b) {
+	if (a%b == 0)return b ;
+	else return gcd(b, a%b);
+}
+
+
+int main()
+{
+
+	//cout << gcd(10, 30) << endl;
+	fraction a(1, 2), b(5, -15), c(10, 30), d(b), e;
+	a.display();
+	b.display();
+	//c.display();
+	e = a.add(b);
+	e.display();
+
+	e = b.substract(a);
+	e.display();
+
+	e = b.add(c);
+	e.display();
+
+
+	if (d.IsEqual(b))
+		cout << "相等";
+	else
+		cout << "不相等";
+
+	return 0;
+}
