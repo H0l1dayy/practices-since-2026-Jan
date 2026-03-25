@@ -1,0 +1,214 @@
+//t3，动态分配内存在运算符重载中要及时删除重新分配
+
+
+#include<iostream>
+using namespace std;
+class Matrix;
+
+class Matrix {
+	int *p;
+	int rows, cols;
+public:
+	Matrix(int r=0, int c=0) :rows(r), cols(c) {
+		p = new int[r*c+1];
+	}
+	Matrix(Matrix &b) {
+		rows = b.rows;
+		cols = b.cols;
+		p = new int[rows*cols+1];
+		for (int i = 0; i < rows*cols; i++) {
+			p[i] = b.p[i];
+		}
+	}
+	void input() {
+		for (int i = 0; i < rows*cols; i++) {
+			cin >> p[i];
+		}
+	}
+	Matrix& operator+(Matrix& b);
+	Matrix& operator=(Matrix& b) {
+		if (rows == 0 || cols == 0) {
+			rows = b.rows;
+			cols = b.cols;
+			delete[]p;
+			//一开始没有重新分配p的内存大小，下面＋的重载也是
+			p =new int [rows*cols + 1];
+			//
+			for (int i = 0; i < rows*cols + 1; i++) {
+				p[i] = b.p[i];
+			}
+			return *this;
+		}
+		else if (rows != b.rows || cols != b.cols) {
+			cout << "the two matrix are not the same" << endl;
+			return *this;
+		}
+		else {
+			for (int i = 0; i < rows*cols + 1; i++) {
+				p[i] = b.p[i];
+			}
+			return *this;
+		}
+	}
+
+	void show() {
+		int n = cols;
+		for (int i = 0; i < rows*cols; i++) {
+			int temp = 0;
+			cout << p[i] << "  ";
+			if ((i + 1 - temp * cols) % n == 0) {
+				cout << endl;
+				temp++;
+			}
+		}
+	}
+	~Matrix() {
+		if (p != nullptr) {
+			delete[]p;
+			p = nullptr;
+		}
+		//如果p没有被初始化会出问题
+
+	};
+};
+Matrix new1;
+Matrix& Matrix::operator+(Matrix& b) {
+	if (rows != b.rows || cols != b.cols)
+		cout << "两数组行数列数不同，无法相加" << endl;
+	else {
+		new1.cols = cols;
+		new1.rows = rows;
+		delete[]new1.p;
+		new1.p = new int[rows*cols + 1];
+		for (int i = 0; i < rows*cols; i++) {
+			new1.p[i] = p[i] + b.p[i];
+		}
+		return new1;
+	}
+}
+
+int main()
+{
+	int r, c;
+
+	cout << "Please input rows & cols : ";
+	cin >> r >> c;
+	Matrix A(r, c), B(r, c);
+	cout << "Please input the first matrix : ";
+	A.input();
+	B = A;
+	B.show();
+
+	Matrix C(A), D(r + 1, c + 1);
+	C.show();
+	C = A + B;
+	C.show();
+	C = D;
+	return 0;
+}
+
+
+
+
+
+//t4，字符串数组的拷贝
+#include <iostream>
+#include <fstream>
+#include <string>  
+using namespace std;
+
+class COMBO;
+class FOOD	//食品类
+{
+private:
+	char Name[15];//食品名
+	float price;//零售价
+public:
+	FOOD(const char *na = 0, float pr = 0) ;    //构造函数
+	void show();  //
+	friend COMBO;
+
+};
+/*
+FOOD::FOOD(const char *na, float pr) {
+
+	if (sizeof(na) > 15) {
+
+		cout << "name过长" << endl;
+
+	}
+
+	else {
+
+		strcpy_s(Name, sizeof(Name), na);
+
+		price = pr;
+
+	}
+
+}
+*/
+//字符串数组的赋值问题，老问题了
+//strcpy_s函数的使用问题
+//sizeof加个指针出来的时指针本身的大小不是数组大小
+FOOD::FOOD(const char *na, float pr) {
+	if (na) {
+		if (strlen(na) > 14) { // Name长度为15，最多存储14个字符（含结束符） 
+			cout << "name过长" << endl;
+			strcpy_s(Name, sizeof(Name), ""); // 过长时设为空字符串 
+		}
+		else {
+			strcpy_s(Name, sizeof(Name), na);
+		}
+	}
+	else {
+		strcpy_s(Name, sizeof(Name), ""); // na为null时设为空字符串 
+	}
+	price = pr;
+}
+void FOOD::show() {
+	cout << Name << "\t" << price << "元" << endl;
+}
+
+class COMBO	//套餐类
+{
+private:
+	FOOD ms[10];	//一份套餐最多提供10种食品
+	int nums;  //食品的实际种类
+	float value;//总价
+public:
+	COMBO();      //
+	COMBO ADD(FOOD & m);	//添加食品    
+	friend void show(COMBO & m);  //
+
+};
+COMBO::COMBO() {
+	nums = 0;
+	value = 0;
+}
+COMBO COMBO::ADD(FOOD & m) {
+	ms[nums] = m;
+	nums++;
+	value += m.price;
+	return *this;
+}
+void show(COMBO & m) {
+	cout << m.nums << "种食物" << ":" << endl;
+	for (int i = 0; i < m.nums; i++) {
+		m.ms[i].show();
+	}
+	cout << "总价:" << m.value << "元" << endl;
+}
+
+int main()
+{
+	FOOD f1("米饭", 1), f2("青椒土豆丝", 2), f3("烤鸭", 5), f4("麻婆豆腐", 3), f5("菊花叶汤", 2.5);
+	COMBO c;
+	c.ADD(f1);
+	c.ADD(f2);
+	c.ADD(f3);
+	c.ADD(f4);
+	c.ADD(f5);
+	show(c);
+	return 0;
+}
