@@ -1,0 +1,206 @@
+#include <iostream>
+#include <cstring>
+
+// 使用标准命名空间
+using namespace std;
+
+// 定义 Task 类
+class Task {
+private:
+    int taskId;  //任务编号
+    char taskName[100]; //存储任务名称
+    int priority;//任务优先级
+
+public:
+    // 构造函数
+    Task(int id, const char* name, int prio) : taskId(id), priority(prio) {
+        strcpy_s(taskName,100, name);
+    }
+
+    
+
+    // 重载 < 运算符，用于比较任务优先级
+    bool operator<(const Task& other) const {
+        return priority < other.priority;
+    }
+
+    // 友元函数，用于输出任务信息
+    friend ostream& operator<<(ostream& os, const Task& task);
+};
+
+// 友元函数实现
+ostream& operator<<(ostream& os, const Task& task) {
+    ///////////////////////////////
+    ///添加代码1
+    os<<"Task ID:"<<task.taskId<<",Task Name:"<<task.taskName<<", Prioeity:"<<task.priority<<endl;
+    return os;
+    /////////////////////////////
+}
+
+// 定义 TaskQueue 类
+class TaskQueue {
+private:
+    Task** tasks; //是一个指向 Task 对象指针的指针，用于表示动态数组
+    int size;     //记录当前队列中任务的数量
+    int capacity;  //记录当前动态数组的容量
+
+    // 扩容函数
+    void resize() {
+        ///////////////////////////////
+        ///添加代码2
+        Task* temp[2*capacity];
+        for(int i = 0;i<capacity;++i){
+            temp[i] = tasks[i];
+        }
+        for(int i = capacity;i<2*capacity;++i){
+            temp[i] = nullptr;
+        }
+        delete [] tasks;
+        capacity = capacity*2;
+        tasks = new Task*[capacity];
+        for(int i = 0;i<capacity;++i){
+            tasks[i] = temp[i];
+        }
+        /////////////////////////////
+    }
+
+public:
+    // 构造函数
+    TaskQueue() : size(0), capacity(10) {
+        tasks = new Task * [capacity] {nullptr};
+    }
+
+    // 析构函数
+    ~TaskQueue() {
+        ///////////////////////////////
+        ///添加代码3
+        for(int i = 0;i<capacity;++i){
+            delete tasks[i];
+        }
+        //delete tasks;
+        delete [] tasks;
+        /////////////////////////////
+    }
+
+//注意看这两个删除的操作
+//注意多重指针再删除时，从里往外删除
+
+    // 入队操作，按优先级插入任务，注意空间是否够，不够扩容
+    void enqueue(Task* task) {
+        ///////////////////////////////
+        ///添加代码4
+        if(size >= capacity){
+            resize();
+        }
+        if(size == 0){
+            tasks[size] = task;
+            ++size;
+        }
+        else{
+            if(task > tasks[size-1]){
+                tasks[size] = task;
+                ++size;
+            }
+            else if(task < tasks[0]){
+                Task* temp1;
+                Task* temp2;
+                temp1 = tasks[0];
+                tasks[0] = task;
+                for(int i = 0;i<size;++i){
+                    temp2 = tasks[i+1];
+                    tasks[i+1] = temp1;
+                    temp1 = temp2;
+                }
+                ++size;
+            }
+            else{
+                int p;
+                for(int i = 0;i<size;++i){
+                    if(tasks[i]<task&&tasks[i+1]>task){
+                        p = i+1;
+                        break;
+                    }
+                }
+                Task* temp[size-p];
+                for(int i = 0;i<size-p;++i){
+                    temp[i] = tasks[p+i];
+                }
+                tasks[p] = task;
+                for(int i = 0;i<size-p;++i){
+                    tasks[p+1+i] = temp[i];
+                }
+                ++size;
+            }
+        }
+        /////////////////////////////
+    }
+
+    // 出队操作
+    Task* dequeue() {
+        ///////////////////////////////
+        ///添加代码5
+        if(size == 0)return nullptr;
+        else{
+            Task* p = tasks[0];
+            for(int i = 0;i<size;++i){
+                tasks[i] = tasks[i+1];
+            }
+            --size;
+            return p;
+        }
+        /////////////////////////////
+    }
+
+    // 重载 [] 运算符，根据索引访问任务
+    Task* operator[](int index) {
+        ///////////////////////////////
+        ///添加代码6
+        if(index >= size){
+            return nullptr;
+        }
+        else{
+            return tasks[index];
+        }
+        /////////////////////////////
+    }
+
+    // 获取队列大小
+    int getSize() const {
+        return size;
+    }
+};
+
+int main() {
+    TaskQueue queue;
+
+    // 添加任务到队列
+    queue.enqueue(new Task(1, "Design UI", 2));
+    queue.enqueue(new Task(2, "Write Code", 1));
+    queue.enqueue(new Task(3, "Test Module", 3));
+
+    // 输出队列中所有任务的信息
+    cout << "All tasks in the queue:" << endl;
+    for (int i = 0; i < queue.getSize(); ++i) {
+        Task* task = queue[i];
+        if (task) {
+            cout << *task << endl;
+        }
+    }
+
+    // 移除一个任务并输出其信息
+    Task* removedTask = queue.dequeue();
+    if (removedTask) {
+        cout << "\nRemoved task:" << endl;
+        cout << *removedTask << endl;
+        delete []removedTask;
+    }
+
+    // 访问队列中指定索引的任务并输出其信息
+    Task* taskAtIndex = queue[0];
+    if (taskAtIndex) {
+        cout << "\nTask at index 0:" << endl;
+        cout << *taskAtIndex << endl;
+    }
+
+    return 0;
+}
