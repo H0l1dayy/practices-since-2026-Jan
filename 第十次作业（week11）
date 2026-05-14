@@ -1,0 +1,101 @@
+//第一次处理继承问题
+/*
+1.如何在类外定义函数
+2.把基类成员看成普通成员一样就行
+3.老错误，构造时传参是中文字符串，所以构造函数要改成const char*而不是char*
+4.在类外定义类内声明的函数时：删掉缺省值
+*/
+
+#include<iostream>
+#include<cstring>
+using namespace std;
+ 
+class ATOM//原子类
+{
+public:
+	char symbol[3];//元素符号
+	int id;//元素序号
+	float atomicweight;//原子量
+public:
+	//ATOM(char * name=0,int m=0,float w=0);// 构造函数
+	ATOM(const char * name=0,int m=0,float w=0);// 构造函数
+	void show()
+	{
+		cout<<"元素符号:"<<symbol<<'\t'<<"元素序号:"<<id<<'\t'<<"原子量:"<<atomicweight<<endl;		
+	}
+};
+
+ATOM::ATOM(const char* name, int m, float w){
+    strcpy_s(symbol,2,name);
+    id = m;
+    atomicweight = w;
+    symbol[2] = '\0';
+}
+/*
+ATOM::ATOM(char* name = 0, int m = 0, float w = 0){
+    strcpy_s(symbol,2,name);
+    id = m;
+    atomicweight = w;
+    symbol[2] = '\0';
+}
+*/
+
+
+class HOMONUCLEAR_MOLECULE:public ATOM//单质分子类
+{
+	char formula[5];//分子符号
+	int num;//原子个数
+	float formulaweight;//分子量
+public:
+	HOMONUCLEAR_MOLECULE(const char *name1=0,int m=0,float w=0,const char *name2=0,int n=0):ATOM(name1,m,w)
+	{
+		if(name2)
+			strcpy(formula,name2);
+		else
+			strcpy(formula,"\0");
+		num=n;
+		formulaweight=atomicweight*num;
+	}
+	void set(ATOM & a,const char *name=0,int n=0);// 为对象设定数据成员值
+	
+	void show();//输出函数
+	
+	
+};
+/*
+void HOMONUCLEAR_MOLECULE::set(ATOM & a,const char *name = 0,int n = 0){
+    num = n;
+    ATOM(a.symbol,a.id,a.atomicweight);
+    strcpy_s(formula,strlen(name)+1,name);
+    formulaweight = atomicweight*num;
+}
+	*/
+
+void HOMONUCLEAR_MOLECULE::set(ATOM & a,const char *name,int n){
+    num = n;
+    strcpy_s(symbol ,strlen(a.symbol)+1,a.symbol);
+	id = a.id;
+	atomicweight = a.atomicweight;
+    strcpy_s(formula,strlen(name)+1,name);
+    formulaweight = atomicweight*num;
+}
+
+void HOMONUCLEAR_MOLECULE::show(){
+    cout<<formula<<"构造元素："<<endl<<"元素符号："<<symbol<<" 元素序号："<<id<<" 原子量:"<<atomicweight<<endl;
+    cout<<"原子个数："<<num<<" 分子量:"<<formulaweight<<endl;
+}
+
+int main()
+{
+	HOMONUCLEAR_MOLECULE hm[4],x("O",8,16,"臭氧",3);
+	ATOM a1("N",7,14),a2("P",15,30.97),a3("Ar",18,39.95);
+	hm[0].set(a1,"氮气",2);
+	hm[1].set(a2,"白磷",4);
+	hm[2].set(a3,"氩气",1);
+	hm[3]=x;
+	for(int i=0;i<4;i++)
+	{
+		hm[i].show();		
+	}
+	return 0;
+}
