@@ -204,3 +204,80 @@ int main()
 	}
 	return 0;
 }
+
+
+//作业三
+//虚基类的构造一定要！填满缺省值或直接定义一个默认构造函数
+#include<iostream>
+#include<cstring>
+using namespace std;
+
+class Person
+{
+public:
+Person(const char * nam, char s,int a);
+~Person();
+protected:
+char  *name;  //字符串,动态分配内存空间
+int age;
+char sex;
+};
+ 
+Person::Person(const char*nam = "",char s = '0',int a = 0){
+    name = new char[strlen(nam)+1];
+    strcpy_s(name,strlen(nam)+1,nam);
+    sex = s;
+    age = a;
+}
+
+Person::~Person(){
+    delete[]name;
+}
+
+class Teacher : virtual public Person
+{public:
+Teacher(const char nam[],char s,int a,const char* t);
+protected:
+char *title;//字符串,动态分配内存空间
+};
+ 
+Teacher::Teacher(const char nam[],char s,int a,const char* t){
+    name = new char[strlen(nam)+1];
+    strcpy_s(name,strlen(nam)+1,nam);
+    title = new char[strlen(t)+1];
+    strcpy_s(title,strlen(t)+1,t);
+    age = a;
+    sex = s;
+}
+
+class Student:virtual public Person 
+{public:
+Student(const char nam[],char s,int a, float sco);
+protected:
+float score;
+};
+
+Student::Student(const char nam[],char s,int a, float sco){
+    name = new char[strlen(nam)+1];
+    strcpy_s(name,strlen(nam)+1,nam);
+    age = a;
+    sex = s;
+    score = sco;
+}
+ 
+class Graduate: public Teacher, public Student{
+public:
+    Graduate(const char* nam,int a,char s,const char*t,float sco):Teacher(nam,s,a,t),Student(nam,s,a,sco){
+    }
+    void show(){
+        cout<<"名字："<<name<<" 年龄："<<age<<" 性别："<<sex<<endl;
+        cout<<"职务："<<title<<" 成绩："<<score<<endl;
+    }
+};
+ 
+int main()
+{
+Graduate grad("wangli",24,'f',"assistant",89.5);
+grad.show();
+return 0;
+}
