@@ -281,3 +281,121 @@ Graduate grad("wangli",24,'f',"assistant",89.5);
 grad.show();
 return 0;
 }
+
+
+
+
+
+//涉及：整型量化字符型
+//指针手动移动后临时变量不可作为左值问题
+
+#include<iostream>
+using namespace std;
+
+char* itoa(int n,char* s){
+    char* temp;
+    temp = new char[20];
+    int i ;
+    for(i = 0;;++i){
+        *(temp+i) = n%10+'0';
+    //整型量化字符型变量的方法，数字+'0'，非常重要，转化为改数字对应的ASCII值
+    //此时cout这个ASCII值就能得到这个数字
+        if(n<10){
+            break;
+        }
+        n = n/10;
+    }
+    for(int n = 0;n<=i;++n){
+        *(s+n) = *(temp +i-n);
+    }
+    *(s+i+1) = '\0';
+    return s;
+}
+
+class Date{
+private:
+    int Year;
+    int Month;
+    int Day;
+public:
+    Date(int y = 0,int m = 0,int d = 0){
+        Year = y;
+        Month = m;
+        Day = d;
+    }    
+    void SetDate(int y,int m,int d){
+        Year = y;
+        Month = m;
+        Day = d;
+    }
+    void GetDate(char* n){
+        n = itoa(Year,n);
+        *(n+4) = '/';
+        //(n+5) = itoa(Month,n+5);
+        //临时变量！！
+        //或者可以用char* temp = n+5;
+        //temp = itoa....
+        itoa(Month,n+5);
+        *(n+7) = '/';
+        //(n+8) = itoa(Day,n+8);
+        itoa(Day,n+8);
+    }
+};
+
+class Time{
+private:
+    int Hour;
+    int Minute;
+    int Second;
+public:
+    Time(int h,int m,int s){
+        Hour = h;
+        Minute = m;
+        Second = s;
+    }
+    void SetTime(int h,int m,int s){
+        Hour = h;
+        Minute = m;
+        Second = s;
+    }
+    void GetTime(char* n){
+        n = itoa(Hour,n);
+        *(n+2) = ':';
+        itoa(Minute,n+3);
+        *(n+5) = ':';
+        itoa(Second,n+6);
+    }
+};
+
+class DateTime:public Date,public Time{
+public:
+    DateTime(int y,int m,int d,int h,int M,int s):Date(y,m,d),Time(h,M,s){};
+    void SetDateTime(int y,int m ,int d,int h,int M,int s){
+        SetDate(y,m,d);
+        SetTime(h,M,s);
+    }
+    void GetDateTime(char* n){
+        GetDate(n);
+        char* temp = n+12;
+        GetTime(temp);
+    }
+};
+
+int main()
+{   
+	char DTStr[80];
+	DateTime  dt(2016, 5, 8, 12, 30, 10);
+
+	dt.GetDateTime(DTStr);
+	cout << DTStr << endl;
+
+	dt.SetDate(2017, 4, 18);
+	dt.GetDateTime(DTStr);
+	cout << DTStr << endl;
+
+	dt.SetDateTime(2018, 5, 1, 10, 43, 0);
+	dt.GetDateTime(DTStr);
+	cout << DTStr << endl;
+
+	return 0;
+}
