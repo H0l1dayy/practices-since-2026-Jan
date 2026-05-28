@@ -1,0 +1,94 @@
+#include<iostream>
+#include<cmath>
+using namespace std;
+
+int gcd(int a,int b);
+class Division{
+private:
+    int son;
+    int mother;
+public:
+    void simplify(){
+        int temp = gcd(son,mother);
+        son = son/temp;
+        mother = mother/temp;
+    }
+    Division(int s = 0,int m = 1):son(s),mother(m){
+        if((s>0&&m>0)||(s<0&&m<0)){
+            simplify();
+        }
+        else{
+            son = fabs(s);
+            mother = fabs(m);
+            simplify();
+            son = -son;
+        }
+    };
+    Division operator=(Division other){
+        son = other.son;
+        mother = other.mother;
+        return *this;
+    }
+    //非常重要，一开始报错了因为+返回的是临时变量，也就是左值，左值不可以被&，所以用不了赋值运算符
+    //要把赋值运算符的参数类型里的&改掉
+    Division operator+(Division& other){
+        int S = son*other.mother+mother*other.son;
+        int M = mother*other.mother;
+        return Division(S,M);
+    }
+
+    Division operator-(Division& other){
+        int S = son*other.mother-mother*other.son;
+        int M = mother*other.mother;
+        return Division(S,M);
+    }
+
+    friend Division operator*(Division& a,Division& b);
+    //friend Division operator/(Division& a,Division& b){}
+    //错在：定义了，{}意味着定义了且函数体为空，与下面类外定义冲突
+    //应该只声明不定义
+    friend Division operator/(Division& a,Division& b);
+    friend ostream& operator<<(ostream& os,Division& other);
+    friend istream& operator>>(istream& os,Division& other);
+};
+
+Division operator*(Division& a,Division& b){
+    return Division(a.son*b.son,a.mother*b.mother);
+}
+
+Division operator/(Division& a,Division& b){
+    return Division(a.son*b.mother,a.mother*b.son);
+}
+
+ostream& operator<<(ostream& os,Division& other){
+    os<<other.son<<"/"<<other.mother<<endl;
+    return os;
+}
+
+istream& operator>>(istream& os,Division& other){
+
+}
+
+int gcd(int a,int b){
+    if(a%b == 0)return b;
+    else return gcd(b,a%b);
+}
+int  main()
+{
+	Division  a(1, 3), b(3, -12), c;
+
+	cout << "a="<<a<<endl;        //行1
+	cout << "b="<<b<<endl;
+	c = a + b;                      //行2
+	cout << "a+b="<<c<<endl;
+	c = a - b;
+	cout << "a-b="<<c<<endl;
+	cout << "a*b="<<c<<endl;
+	c = a / b;                       //行3
+	cout << "a/b="<<c<<endl;
+    // 添加输出到txt文件的代码，代码可以插在前面代码中
+   //.....
+   //.....
+
+	return 0;
+}
