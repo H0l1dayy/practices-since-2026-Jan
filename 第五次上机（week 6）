@@ -1,0 +1,145 @@
+#include<iostream>
+#include<cmath>
+#include<string>
+#include<cstring>
+using namespace std;
+
+// 判断数组内容是否为从大到小排序的函数模板
+template<typename T>
+bool isDecSorted( T list[], int size)   
+{
+// 遍历数组，完成测试数组是否为从大到小降序排序的状态，排序返回真，不是降序排列则返回假
+    bool temp = 1;
+    for(int i = 1;i<size;++i){
+        if(list[i] > list[i-1]){
+            temp = 0;
+            break;
+        }
+    }
+    return temp;
+}
+
+// 图书类
+class CBook
+{
+
+	string bookname;    // 书名
+	string bookauthor;  // 作者
+	char *description;  // 简介
+	int lendingtimes;   // 借出次数，借阅量
+public:
+	CBook(string bname = "无",string bauthor = "无",const char* des = "无",int lend = 0):bookname(bname),bookauthor(bauthor),lendingtimes(lend){
+        int len = strlen(des);
+        description = new char[len+1];
+        for(int i = 0;i<len;++i){
+            description[i] = des[i];
+        }
+        description[len] = '\0';
+    }
+
+    CBook(const CBook& other){
+        bookname = other.bookname;
+        bookauthor = other.bookauthor;
+        lendingtimes = other.lendingtimes;
+        int len = strlen(other.description);
+        description = new char[len+1];
+        for(int i = 0;i<len;++i){
+            description[i] = other.description[i];
+
+        }
+        description[len] = '\0';
+    }
+    ~CBook(){
+        delete []description;
+    }
+
+    int getLendingTimes() const {
+        return lendingtimes;
+    }
+
+// 按照题目分析完成必要的构造函数，析构函数，
+
+
+	void setinfo(string name, string author, const char *des, int times)
+	{
+//  完成重新设置图书信息的函数
+        bookname = name;
+        bookauthor = author;
+        lendingtimes = times;
+        int len = strlen(des);
+        delete [] description;
+        description = new char[len+1];
+        for(int i = 0;i<len;++i){
+            description[i] = des[i];
+        }
+        description[len]= '\0';
+	}
+
+	void getinfo(string &name, string &au, char * des, int &num)
+	{
+		name=bookname;
+		au=bookauthor;
+		strcpy(des, description);
+		num=lendingtimes;
+	}
+
+	void print()
+	{
+// 输出书籍的所有信息，按照一行输出。
+        cout<<"书名：" << bookname;
+        cout<<"作者：" << bookauthor;
+        cout<<"简介："<< description;
+        cout<<"借阅量："<<lendingtimes<<endl;
+	}
+
+	bool operator>(CBook& a) {
+		if (this->lendingtimes > a.lendingtimes)return 1;
+		else return 0;
+	}
+
+    //差了一个赋值运算符重载
+    //有动态内存分配的赋值运算符重载的固定格式
+    CBook& operator=(const CBook& other){
+        if(this == &other)return *this;
+        delete[] description;
+        bookname = other.bookname;
+        bookauthor = other.bookauthor;
+        description = new char[strlen(other.description)+!];
+        strcpy_s(description,strlen(other.description)+1,other.description);
+        lendingtimes = other.lendingtimes;
+        return *this;
+        //关键就在于一开始的判断，如果没有会扣分
+        //拷贝构造则不需要，因为是从没有到有
+    }
+};
+
+
+int main()
+{
+
+	int i;
+	CBook bookarray[5]={ CBook("一句顶一万句","刘震云","底层百姓人物的故事",200),
+						CBook("蛙","莫言","乡村女医生的人生经历",180),
+						CBook("推拿","毕飞宇","推拿中心盲人的情感、尊严和梦想",170),
+						CBook("你在高原","张炜","地质队员的故事",160),
+						CBook("天行者","刘醒龙","乡村民办教师的故事",150),
+						};
+
+	for(i=0; i<5; i++)
+	{
+		bookarray[i].print();
+	}
+
+	if(isDecSorted(bookarray, 5))
+		cout<<"已经按借阅量排序"<<endl;
+	else
+		cout<<"没有按借阅量排序"<<endl;
+
+	CBook book1;
+	book1.setinfo ("人世间","梁晓声", "描写了中国社会的巨大变迁和百姓生活", 150);
+ 
+	CBook book2=book1; 
+	book2.print();
+
+	return 0;
+}
