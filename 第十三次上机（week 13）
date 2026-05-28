@@ -92,3 +92,102 @@ int  main()
 
 	return 0;
 }
+
+
+
+#include<iostream>
+#include<fstream>
+#include<iomanip>
+using namespace std;
+
+#define N 10
+class Student{
+	char  snum[N];
+	char  name[N];
+	float math;
+	float eng;
+	float phy; 
+public:
+    friend istream & operator >>(istream &  in, Student & s); 
+	friend ostream & operator <<(ostream &  out, Student & s); 			
+    friend class Group;       //行1
+};
+    istream & operator >>(istream &  in, Student & s){
+        in>>s.snum>>s.name>>s.math>>s.eng>>s.phy;
+
+        return in;
+    }
+    //这里不用手动加'\0'，ifstream操作会自己添加
+
+
+    ostream & operator <<(ostream &  out, Student & s){
+        out<<s.snum<<setw(8)<<s.name<<setw(8)<<s.math<<setw(8)<<s.eng<<setw(8)<<s.phy<<endl;
+        return out;
+    }
+class Group{
+	Student * sp;
+	float avemath;
+	float aveeng;
+	float avephy;	
+	int size;
+	int n;
+public:
+	Group(const char * s)//读文件，初始化成员数据，注意sp需要动态分配
+	{
+		sp = new Student[N];
+		size = N;
+		avemath = aveeng = avephy = n = 0;		
+        ifstream ifile;
+        ifile.open(s);
+        for(n = 0;n<10;++n){
+            //ifile>>sp[n];
+            //if(ifile.get() == EOF)break;
+            //这个判断不准确，用下面这个更好，直接判断流状态
+            if(!(ifile>>sp[n]))break;
+        }
+        for(int i = 0;i<n;++i){
+            aveeng += sp[i].eng;
+        }
+        aveeng = aveeng/n;
+
+        for(int i = 0;i<n;++i){
+            avemath += sp[i].math;
+        }
+        avemath = avemath/n;
+
+        for(int i = 0;i<n;++i){
+            avephy += sp[i].phy;
+        }
+        avephy = avephy/n;
+        ifile.close();
+
+	}
+	virtual ~Group(){}
+	friend ostream & operator <<(ostream &  out, Group & s); 
+}; 
+
+    ostream & operator <<(ostream &  out, Group & s){
+        //out<<s.sp;
+        //这是个student类的指针，这样输出的是指针的地址
+        for(int i = 0;i<s.n;++i){
+            out<<s.sp[i];
+        }
+        out<<"学生总数: "<<s.n<<endl;
+        out<<"数学平均分： "<<s.avemath<<endl;
+        out<<"英语平均分： "<<s.aveeng<<endl;
+        out<<"物理平均分： "<<s.avephy<<endl;
+        return out;
+    }
+
+int main(){
+
+	Group gp("D:\\data1.txt");  //data文件放在什么地方需要修改路径
+	cout << gp;           //行2
+    ofstream outfile("C:\\Users\\morni\\Desktop\\result.txt");
+	if (!outfile){
+			cout << "不能打开目的文件result.txt!" << endl;
+			exit(2);
+	}
+    outfile << gp;
+	return 0;
+}
