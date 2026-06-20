@@ -1,0 +1,91 @@
+#include <iostream>
+using namespace std;
+
+#define PI 3.1415936
+
+class Shape
+{
+public:
+virtual float Area (void) =0;
+virtual void SetData (float a = 0,float b = 0) =0;};
+//成员函数 SetData（）用于设置几何图形的属性值。
+//成员函数 Area（）用于求出几何图形的面积由 Shape 类派生出四种几何图形，它们分别是∶ 三角形、矩形、正方形和圆形。例如三角形类的定义如下∶
+/*
+class Triangle: public Shape
+float w，h;// w表示底边长，h表示三角形的高度 public:
+Triangle (float ww=0,float hh=0){ w=ww; h=hh;} float Area (void){ return w*h/2;}
+void SetData(float ww,float hh=0){ w=ww; h=hh; });
+*/
+class Triangle:public Shape{
+    float w,h;
+public:
+    Triangle(float ww = 0,float hh = 0):w(ww),h(hh){}
+    float Area(void){
+        return w*h/2;
+    }
+    void SetData(float ww = 0, float hh = 0){
+        w = ww;
+        h = hh;
+    }
+};
+
+class Rectangle:public Shape{
+    float w,h;
+public:
+    Rectangle(float ww = 0,float hh = 0):w(ww),h(hh){}
+    float Area(void){
+        return w*h;
+    }
+    
+    void SetData(float ww = 0, float hh = 0){
+        w = ww;
+        h = hh;
+    }
+};
+
+class Square:public Shape{
+    float s;
+public:
+    Square(float ss = 0):s(ss){}
+    float Area(void){
+        return s*s;
+    }
+    void SetData(float hh = 0, float = 0){
+        s = hh;
+    }
+};
+
+class Circle:public Shape{
+    float r;
+public:
+    Circle(float rr = 0):r(rr){}
+    float Area(void){
+        return r*r*PI;
+    }
+    void SetData(float rr = 0, float = 0){
+        r = rr;
+    }
+};
+
+// 全局函数：通过基类指针调用虚函数，实现多态
+float Area(Shape* p)
+{
+    return p->Area();
+}
+
+int main()
+{
+	Triangle tri(3, 4);
+	Rectangle rec(4, 5);
+	Square squ;
+	Circle cir;
+	double s = 2, r = 8;
+	squ.SetData(s);
+	cir.SetData(r);
+	double area = Area(&tri) + Area(&rec) + Area(&squ) + Area(&cir);
+	cout << "The sum of areas = " << area << endl;
+   return 0;
+}
+
+//纯虚函数参数个数与子类函数参数个数不同时如何处理
+//怎么调用纯虚函数什么叫创建一个全局函数调用他们
